@@ -1,0 +1,5 @@
+<div>
+  <input type="text" name="username" #name>
+  <input type="text" name="password" #pass>
+  <input type="submit" value="save" (click)="onCreate(name.value, pass.value)">
+</div>
