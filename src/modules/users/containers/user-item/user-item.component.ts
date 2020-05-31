@@ -10,13 +10,13 @@ import * as fromStore from '../../store';
 })
 export class UserItemComponent implements OnInit {
 
-  constructor(private store: Store<fromStore.State>) {}
+  constructor(private store: Store<fromStore.UserState>) {}
 
   ngOnInit(): void {
   }
 
   onCreate(username: string, password: string) {
-    this.store.dispatch(new fromStore.CreateUser({username, password, id: 6}));
+    // this.store.dispatch(new fromStore.CreateUser({username, password, id: 6}));
   }
 
 }

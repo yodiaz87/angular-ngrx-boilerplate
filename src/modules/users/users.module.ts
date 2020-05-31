@@ -6,8 +6,9 @@ import { HttpClientModule } from '@angular/common/http';
 
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
+import { UserResolver } from './services/resolvers/user.resolver';
 
-import { reducers, effects } from './store';
+import { userFeatureKey,  userReducer, effects } from './store';
 
 // components
 import * as fromComponents from './components';
@@ -19,12 +20,15 @@ import * as fromContainers from './containers';
 // import * as fromGuards from './guards';
 
 // services
-// import * as fromServices from './services';
+import * as fromServices from './services';
 
 // routes
 export const routes: Routes = [
   {
     path: '',
+    resolve: {
+      users: UserResolver
+    },
     //  canActivate: [fromGuards.PizzasGuard],
     component: fromContainers.UsersComponent
   },
@@ -32,12 +36,8 @@ export const routes: Routes = [
     path: 'new',
    // canActivate: [fromGuards.PizzasGuard, fromGuards.ToppingsGuard],
     component: fromContainers.UserItemComponent,
-  },
-  /* {
-     path: ':pizzaId',
-  //   canActivate: [fromGuards.PizzaExistsGuards, fromGuards.ToppingsGuard],
-     component: fromContainers.ProductItemComponent,
-   },*/
+  }
+
 ];
 
 @NgModule({
@@ -46,10 +46,10 @@ export const routes: Routes = [
     ReactiveFormsModule,
     HttpClientModule,
     RouterModule.forChild(routes),
-    StoreModule.forFeature('users', reducers),
+    StoreModule.forFeature(userFeatureKey, userReducer),
     EffectsModule.forFeature(effects),
   ],
-//  providers: [...fromServices.services, ...fromGuards.guards],
+  providers: [...fromServices.services],
   declarations: [...fromContainers.containers, ...fromComponents.components],
   exports: [...fromContainers.containers, ...fromComponents.components],
 })

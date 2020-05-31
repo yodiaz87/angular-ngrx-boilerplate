@@ -1,38 +1,39 @@
-import { createSelector } from '@ngrx/store';
+import { createFeatureSelector, createSelector } from '@ngrx/store';
+import { adapter, userFeatureKey, UserState } from '../reducers';
 
-import * as fromRoot from '../../../app/store';
-import * as fromFeature from '../reducers';
-import * as fromUsers from '../reducers/users.reducer';
 
-import { User } from '../../models/user.model';
+// Lookup the 'User' feature state managed by NgRx
+const getUserState = createFeatureSelector<UserState>(userFeatureKey);
 
-export const getUserState = createSelector(
-  fromFeature.getUsersState,
-  (state: fromFeature.State) => state.users
-);
+// get the selectors
+const { selectIds, selectAll, selectTotal } = adapter.getSelectors();
 
-export const getUsersEntities = createSelector(
+// select the array of User ids
+export const selectUserIds = createSelector(
   getUserState,
-  fromUsers.getUsersEntities
+  selectIds
 );
 
-export const getSelectedUser = createSelector(
-  getUsersEntities,
-  fromRoot.getRouterState,
-  (entities, router): User => {
-    return router.state && entities[router.state.params.userId];
-  }
-);
-
-export const getAllUsers = createSelector(getUsersEntities, entities => {
-  return Object.keys(entities).map(id => entities[parseInt(id, 10)]);
-});
-
-export const getUsersLoaded = createSelector(
+// select the array of Users
+export const selectAllUsers = createSelector(
   getUserState,
-  fromUsers.getUsersLoaded
+  selectAll
 );
-export const getUsersLoading = createSelector(
+
+// select the total User count
+export const selectUserCount = createSelector(
   getUserState,
-  fromUsers.getUsersLoading
+  selectTotal
+);
+
+// select entity loaded flag
+export const selectUserLoaded = createSelector(
+  getUserState,
+  state => state.loaded
+);
+
+// select entity error
+export const selectError = createSelector(
+  getUserState,
+  state => state.error
 );

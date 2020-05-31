@@ -1,89 +1,47 @@
-import * as fromUsers from '../actions/users.actions';
+import { createReducer, on, Action } from '@ngrx/store';
+import { EntityState, EntityAdapter, createEntityAdapter } from '@ngrx/entity';
+
+import { fromUserActions } from '../actions';
 import { User } from '../../models/user.model';
 
-export interface UserState {
-  entities: { [id: number]: User };
+export const userFeatureKey = 'user';
+
+export interface UserState extends EntityState<User> {
   loaded: boolean;
-  loading: boolean;
+  error?: Error | any;
 }
 
-export const initialState: UserState = {
-  entities: {},
+export const adapter: EntityAdapter<User> = createEntityAdapter<User>({
+  // In this case this would be optional since primary key is id
+  selectId: item => item.id
+});
+
+export interface UserPartialState {
+  readonly [userFeatureKey]: UserState;
+}
+
+export const initialState: UserState = adapter.getInitialState({
+  // Additional user state properties
   loaded: false,
-  loading: false,
-};
+  error: null
+});
 
-export function reducer(
-  state = initialState,
-  action: fromUsers.UsersAction
-): UserState {
-  switch (action.type) {
-    case fromUsers.LOAD_USERS: {
-      return {
-        ...state,
-        loading: true,
-      };
-    }
+const reducerHandler = createReducer(
+  initialState,
+  on(fromUserActions.loadUsersSuccess, (state, { users }) => {
+    return adapter.setAll(users, {
+      ...state,
+      loaded: true
+    });
+  }),
+  on(fromUserActions.loadUsersFail, (state, { error }) => {
+    return {
+      ...state,
+      error
+    };
+  })
+);
 
-    case fromUsers.LOAD_USERS_SUCCESS: {
-      const users = action.payload;
-
-      const entities = users.reduce(
-        (entities: { [id: number]: User }, user: User) => {
-          return {
-            ...entities,
-            [user.id]: user,
-          };
-        },
-        {
-          ...state.entities,
-        }
-      );
-
-      return {
-        ...state,
-        loading: false,
-        loaded: true,
-        entities,
-      };
-    }
-
-    case fromUsers.LOAD_USERS_FAIL: {
-      return {
-        ...state,
-        loading: false,
-        loaded: false,
-      };
-    }
-
-    case fromUsers.UPDATE_USER_SUCCESS:
-    case fromUsers.CREATE_USER_SUCCESS: {
-      const user = action.payload;
-      const entities = {
-        ...state.entities,
-        [user.id]: user,
-      };
-
-      return {
-        ...state,
-        entities,
-      };
-    }
-
-    case fromUsers.REMOVE_USER_SUCCESS: {
-      const user = action.payload;
-      const { [user.id]: removed, ...entities } = state.entities;
-
-      return {
-        ...state,
-        entities,
-      };
-    }
-  }
-
-  return state;
+export function userReducer(state: UserState | undefined, action: Action) {
+  return reducerHandler(state, action);
 }
-
-export const getUsersEntities = (state: UserState) => state.entities;
-export const getUsersLoading = (state: UserState) => state.loading;
-export const getUsersLoaded = (state: UserState) => state.loaded;

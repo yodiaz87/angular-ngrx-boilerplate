@@ -12,7 +12,8 @@
     </div>
     <table>
       <tr *ngFor="let user of (users$ | async)">
-        <td> {{ user.username }}</td>
+        <td> {{ user | json }}</td>
+
       </tr>
 
     </table>
